@@ -123,3 +123,8 @@ create table reserva(
     valor_total NUMBER(11),
     estado_reserva VARCHAR2(25)
 );
+
+CREATE TABLE ControlAcceso (
+    usuario VARCHAR2(50),
+    fecha DATE
+);
