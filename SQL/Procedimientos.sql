@@ -195,3 +195,60 @@ BEGIN
 	INSERT INTO reserva(id_reserva,id_cliente,ciudad_origen,ciudad_destino,id_vuelo,id_hotel,fecha_registro,valor_total,estado_reserva)
 VALUES(id_in, cliente_in, ciudad_ori, ciudad_des, vuelo_in, hotel_in, fecha_in, total, estado);
 END;
+
+-- Cancelacion viaje
+
+CREATE OR REPLACE PROCEDURE cancelar-viaje(p_id_cliente NUMBER) 
+IS
+BEGIN
+       UPDATE reserva_vuelo rv
+       SET rv.estado_solicitud_vuelo = 'CANCELLED'
+       WHERE rv.id_reserva_vuelo IN (
+              SELECT r.id_reserva_vuelo
+              FROM reservas r
+              WHERE r.cliente_id = p_cliente_id
+    );
+END;
+
+-- Cancelacion alojamiento
+
+CREATE OR REPLACE PROCEDURE cancelar-alojamiento(p_id_cliente NUMBER) 
+IS
+BEGIN
+       UPDATE reserva_hotel rh
+       SET rh.estado_solicitud_hotel = 'CANCELLED'
+       WHERE rh.id_reserva_hotel IN (
+              SELECT r.id_reserva_hotel
+              FROM reservas r
+              WHERE r.cliente_id = p_cliente_id
+    );
+END;
+
+--Cancelacion total
+
+CREATE OR REPLACE PROCEDURE cancelar-todo(p_id_cliente NUMBER) 
+IS
+BEGIN
+       --cancelacion reserva
+       UPDATE reservas r
+       SET r.estado_reserva = 'CANCELLED'
+       WHERE r.cliente_id = p_cliente_id;
+       --cancelacion vuelo
+       UPDATE reserva_vuelo rv
+       SET rv.estado_solicitud_vuelo = 'CANCELLED'
+       WHERE rv.id_reserva_vuelo IN (
+              SELECT r.id_reserva_vuelo
+              FROM reservas r
+              WHERE r.cliente_id = p_cliente_id
+       );
+       --cancelacion alojamiento
+       UPDATE reserva_hotel rh
+       SET rh.estado_solicitud_hotel = 'CANCELLED'
+       WHERE rh.id_reserva_hotel IN (
+              SELECT r.id_reserva_hotel
+              FROM reservas r
+              WHERE r.cliente_id = p_cliente_id
+       );
+END;
+
+
