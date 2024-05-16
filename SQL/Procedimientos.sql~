@@ -1,0 +1,9 @@
+CREATE OR REPLACE PROCEDURE insertar_aerolinea(
+       id_in 	  NUMBER,
+       nombre_aerolinea_in VARCHAR2,
+       reservas_in	  NUMBER)
+       IS
+BEGIN
+       INSERT INTO aerolinea(id_aerolinea, nombre_aerolinea, reservas)
+       VALUES (id_in, nombre_aerolinea_in, reservas_in);
+END;
