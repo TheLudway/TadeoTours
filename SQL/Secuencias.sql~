@@ -1,0 +1,23 @@
+-- Para la secuencia de las aerolíneas
+CREATE SEQUENCE secuencia_aerolinea START WITH 1 INCREMENT BY 1;
+
+-- Para la secuencia de los sitios
+CREATE SEQUENCE secuencia_sitios START WITH 1 INCREMENT BY 1;
+
+-- Para la secuencia de los paises
+CREATE SEQUENCE secuencia_paises START WITH 1 INCREMENT BY 1;
+
+-- Para la secuencia de las ciudades
+CREATE SEQUENCE secuencia_ciudades START WITH 1 INCREMENT BY 1;
+
+-- Para la secuencia de los hoteles.
+CREATE SEQUENCE secuencia_hoteles START WITH 1 INCREMENT BY 1;
+
+-- Para la secuencia de las habitaciones.
+CREATE SEQUENCE secuencia_hoteles START WITH 1 INCREMENT BY 1;
+
+-- Para la secuencia de los bancos
+CREATE SEQUENCE secuencia_bancos START WITH 1 INCREMENT BY 1;
+
+-- Para la secuencia de los métodos de pago
+CREATE SEQUENCE secuencia_metodospago START WITH 1 INCREMENT BY 1;
