@@ -263,7 +263,10 @@ Todos los \textit{scripts} se encuentran en el cuadro \ref{tab:catalogo-scripts}
         \multicolumn{4}{|c|}{\textbf{Catalogación de \textit{scripts}}} \\ \hline
         \textbf{Nombre \textit{script}} &  \textbf{Descripción} & \textbf{Fecha creación} & \textbf{Versión} \\ \hline
         CREAR\_TABLAS & Crea todas las tablas que se van a utilizar para el esquema de TadeoTours & 09/05/2024 & 1.0 \\ \hline
+        Secuencias & Creación de secuencias para ayudar a la inserción de datos & 15/05/2024 & 1.0 \\ \hline
+        Procedimientos & Procedimientos necesarios para realizar las reservas correspondientes. & 15/05/2024 & 1.0 \\ \hline
         INSERTAR\_DATOS & Inserción de datos a todas las tablas del esquema. & 09/05/2024 & 1.0 \\ \hline
+        Triggers & Backups y precauciones para los datos & 16/05/2024 & 1.0 \\ \hline
     \end{tabular}
     \caption{Catalogo de \textit{scripts} usados para cargar el esquema de la base de datos}
     \label{tab:catalogo-scripts}
@@ -280,7 +283,9 @@ Los autores del presente documento recomiendan seguir los pasos que se presentan
          \multicolumn{3}{|c|}{\textbf{Guía de instalación}} \\ \hline
          \textbf{Paso} & \textbf{Acción} & \textbf{Descripción} \\\hline  
          1 & Crear tablas & Ejecutar el \textit{script} CREAR\_TABLAS \\\hline
-         2 & Insertar datos & Ejecutar el \textit{script} INSERTAR\_DATOS \\\hline
+         2 & Crear secuencias & Ejecutar el \textit{script} Sequencias.sql \\ \hline
+         3 & Crear procedimientos & Ejecutar el \textit{script} Procedimientos.sql \\ \hline
+         4 & Insertar datos & Ejecutar el \textit{script} INSERTAR\_DATOS \\\hline
     \end{tabular}
     \caption{Pasos para realizar una correcta instalación del esquema de bases de datos \textit{TadeoTours}}
     \label{tab:guia-instalacion}
@@ -358,7 +363,7 @@ FETCH FIRST 5 ROWS ONLY;
 
 Se obtiene:
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \includegraphics[width=0.75\linewidth]{img/Consulta_3.png}
 \end{figure}
@@ -460,21 +465,186 @@ Se obtiene:
 
 \newpage
 \section{Construcción de paquete almacenado}
+
 \subsection{Procedimiento para registro de cliente}
+Mediante el siguiente \textit{script} se puede registrar un usuario dentro de la base de datos.
+\begin{lstlisting}
+CREATE OR REPLACE PROCEDURE insertar_cliente(
+       id_in	  NUMBER,
+       ciudad_in  NUMBER,
+       credito_in NUMBER,
+       nombre_in  VARCHAR2,
+       apellido_in VARCHAR2,
+       tip_doc_in  VARCHAR2
+       documento_in VARCHAR2,
+       edad_in	    NUMBER,
+       correo_in    VARCHAR2,
+       tele_fijo_in NUMBER,
+       tele_cel_in  NUMBER,
+       direccion_in VARCHAR2,
+       fax_in	    NUMBER)
+       IS
+BEGIN
+	INSERT INTO cliente (id_cliente, ciudad_residencia, id_solicitud_credito, nombres, apellidos, tipo_documento, documento, edad, correo, telefono_fijo, telefono_celular, direccion, numero_fax)
+	VALUES(id_in, ciudad_in, credito_in, nombre_in, apellido_in, tip_doc_in, documento_in, edad_in, correo_in, tele_fijo_in, tele_cel_in, direccion_in, fax_in)
+END;
+\end{lstlisting}
 \subsection{Procedimiento para registro de solicitud de reserva de tiquetes aéreos y/o alojamiento}
-\subsection{Procedimiento para registro de reservas de tiquetes aéreos y/o alojamiento}
+
+Con los siguientes procedimientos se puede realizar la reserva al hotel y a la aerolínea. Pidiendo los datos correspondientes  que se requieren para que el usuario tenga la mejor experiencia posible.
+
+\begin{lstlisting}
+-- Insertar datos en la reserva de hotel
+
+CREATE OR REPLACE PROCEDURE insertar_reserva_hotel(
+       id_in	  NUMBER,
+       alojamiento_in NUMBER,
+       hotel_in	      NUMBER,
+       sitio_in	      NUMBER,
+       pago_in	      NUMBER,
+       acomodacion_in NUMBER,
+       fecha_in	      DATE,
+       fecha_out      DATE,
+       precio_in      NUMBER,
+       fecha_lim      DATE)
+       IS
+BEGIN
+	INSERT INTO reserva_hotel(id_hotel_reserva,alojamiento_preferencia,hotel_reservado,sitio_preferencia,opcion_pago,tipo_acomodacion,fecha_ingreso,fecha_salida,precio_reserva,fecha_limite_pago)
+	VALUES(id_in, alojamiento_in, hotel_in, sitio_in, pago_in, acomodacion_in, fecha_in, fecha_out, precio_in, fecha_lim);
+END;
+
+-- Insertar datos en la tabla reserva vuelo.
+
+CREATE OR REPLACE PROCEDURE insertar_reserva_vuelo(
+       id_in	  NUMBER,
+       aero_pref_in NUMBER,
+       aero_reserv  NUMBER,
+       opc_pago_in  NUMBER,
+       fecha_in	    DATE,
+       fecha_out    DATE,
+       hora_in	    TIMESTAMP,
+       hora_out	    TIMESTAMP,
+       tipo_vuelo   VARCHAR2,
+       precio_in    NUMBER,
+       fecha_lim    DATE,
+       estado_soli  VARCHAR2)
+       IS
+BEGIN
+	INSERT INTO reserva_vuelo(id_reserva_vuelo,aerolinea_preferencia,aerolinea_reservada,opcion_pago,fecha_salida,fecha_regreso,hora_salida,hora_regreso,tipo_vuelo,precio_vuelo,fecha_limite_pago,estado_solicitud_vuelo)
+	VALUES (id_in, aero_pref_in, aero_reserv, opc_pago_in, fecha_in, fecha_out, hora_in, hora_out, tipo_vuelo, precio_in, fecha_lim, estado_soli);
+END;
+\end{lstlisting}
+
+
 \subsection{Procedimiento para cancelación de reserva de tiquetes aéreos y/o alojamiento}
-\subsection{Función que calcule el indicador de efectividad del proceso de reservas en un período}
-\subsection{Función que calcule el tiempo promedio por reserva en un período.}
+Se tiene las cancelaciones para el viaje, alojamiento y también para la reserva total.
+
+\begin{lstlisting}
+-- Cancelacion viaje
+
+CREATE OR REPLACE PROCEDURE cancelar-viaje(p_id_cliente NUMBER) 
+IS
+BEGIN
+       UPDATE reserva_vuelo rv
+       SET rv.estado_solicitud_vuelo = 'CANCELLED'
+       WHERE rv.id_reserva_vuelo IN (
+              SELECT r.id_reserva_vuelo
+              FROM reservas r
+              WHERE r.cliente_id = p_cliente_id
+    );
+END;
+
+-- Cancelacion alojamiento
+
+CREATE OR REPLACE PROCEDURE cancelar-alojamiento(p_id_cliente NUMBER) 
+IS
+BEGIN
+       UPDATE reserva_hotel rh
+       SET rh.estado_solicitud_hotel = 'CANCELLED'
+       WHERE rh.id_reserva_hotel IN (
+              SELECT r.id_reserva_hotel
+              FROM reservas r
+              WHERE r.cliente_id = p_cliente_id
+    );
+END;
+
+--Cancelacion total
+
+CREATE OR REPLACE PROCEDURE cancelar-todo(p_id_cliente NUMBER) 
+IS
+BEGIN
+       --cancelacion reserva
+       UPDATE reservas r
+       SET r.estado_reserva = 'CANCELLED'
+       WHERE r.cliente_id = p_cliente_id;
+       --cancelacion vuelo
+       UPDATE reserva_vuelo rv
+       SET rv.estado_solicitud_vuelo = 'CANCELLED'
+       WHERE rv.id_reserva_vuelo IN (
+              SELECT r.id_reserva_vuelo
+              FROM reservas r
+              WHERE r.cliente_id = p_cliente_id
+       );
+       --cancelacion alojamiento
+       UPDATE reserva_hotel rh
+       SET rh.estado_solicitud_hotel = 'CANCELLED'
+       WHERE rh.id_reserva_hotel IN (
+              SELECT r.id_reserva_hotel
+              FROM reservas r
+              WHERE r.cliente_id = p_cliente_id
+       );
+END;
+\end{lstlisting}
+\subsection{Triggers para el proyecto}
+Se elaboraron 3 triggers para operaciones como \texttt{UPDATE, INSERT} y \texttt{DELETE}, respectivamente son:
+\begin{lstlisting}
+
+--Trigger update vuelo
+
+CREATE OR REPLACE TRIGGER tr_update_vuelo BEFORE
+UPDATE ON reserva_vuelo
+FOR EACH ROW
+BEGIN
+    IF updating then
+        dbms_output.put_line('OJO Se  esta intentando actualizar un registro en la tabla vuelos');
+         insert into controlAcceso values(user,sysdate);
+    END IF;
+END tr_update_vuelo;
+
+--Trigger insert or update hotel
+
+CREATE OR REPLACE TRIGGER tr_insert_update_hotel BEFORE
+INSERT OR UPDATE hotel
+FOR EACH ROW
+BEGIN
+    IF inserting then
+        dbms_output.put_line('OJO Se  esta intentando insertar un registro en la tabla hotel');
+         insert into controlAcceso values(user,sysdate);
+    IF updating then
+        dbms_output.put_line('OJO Se  esta intentando actualizar un registro en la tabla hotel');
+         insert into controlAcceso values(user,sysdate);
+    END IF;
+END tr_insert_update_hotel;
+
+--Trigger delete cliente
+CREATE OR REPLACE TRIGGER tr_delete_cliente BEFORE
+DELETE cliente
+FOR EACH ROW
+BEGIN  
+    IF deleting then
+        dbms_output.put_line('OJO Se  esta intentando eliminar un registro en la tabla cliente');
+        insert into controlAcceso values(user,sysdate);
+    END IF;
+END tr_delete_cliente;
+\end{lstlisting}
+
 
 \newpage
 \section{Conclusiones y recomendaciones}
 
+Este proyecto ayudó a los autores a tener un conocimiento más sólido en el mundo de las bases de datos, conocimiento que fue adquirido durante el transcurso de la asignatura. Aprender a modelar requerimientos de un cliente y transformarlos a una base de datos, es una habilidad que es muy demandante en estos tiempos modernos, ya que, la crisis del software se origina principalmente por eso, falta de entendimiento de los requerimientos. Después de este proyecto quedaron las bases para comprender las necesidades de un cliente y transformarlas en un producto de software, en este caso, una base de datos.  
 
 
-\newpage
-\bibliographystyle{ieeetr}
-\bibliography{references}
 
 
 \newpage
